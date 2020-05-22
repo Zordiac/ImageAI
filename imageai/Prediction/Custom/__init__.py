@@ -442,6 +442,11 @@ class CustomImagePrediction:
         :param num_objects:
         :return:
         """
+		
+        if self.jsonPath is not None:
+            self.classes = json.load(open(self.jsonPath))
+        else:
+            raise ("You have not specified a model class file.")
 
         self.numObjects = num_objects
 
@@ -715,7 +720,7 @@ class CustomImagePrediction:
                     prediction = model.predict(image_to_predict, steps=1)
 
                 try:
-                    predictiondata = decode_predictions(prediction, top=int(result_count), model_json=self.jsonPath)
+                    predictiondata = decode_predictions(prediction, top=int(result_count), classes=self.classes)
 
                     for result in predictiondata:
                         prediction_results.append(str(result[0]))
@@ -771,8 +776,8 @@ class CustomImagePrediction:
 
 
                 try:
-
-                    predictiondata = decode_predictions(prediction, top=int(result_count), model_json=self.jsonPath)
+                    
+                    predictiondata = self.decode_predictions(prediction, top=int(result_count))
 
                     for result in predictiondata:
                         prediction_results.append(str(result[0]))
@@ -788,7 +793,6 @@ class CustomImagePrediction:
                 model = self.__model_collection[0]
 
                 from .custom_utils import preprocess_input
-                from .custom_utils import decode_predictions
                 from ..DenseNet.densenet import DenseNetImageNet121
                 if (input_type == "file"):
                     try:
@@ -828,7 +832,7 @@ class CustomImagePrediction:
                     prediction = model.predict(x=image_to_predict, steps=1)
 
                 try:
-                    predictiondata = decode_predictions(prediction, top=int(result_count), model_json=self.jsonPath)
+                    predictiondata = self.decode_predictions(prediction, top=int(result_count))
 
                     for result in predictiondata:
                         prediction_results.append(str(result[0]))
@@ -842,7 +846,7 @@ class CustomImagePrediction:
                 model = self.__model_collection[0]
 
                 from imageai.Prediction.InceptionV3.inceptionv3 import InceptionV3
-                from .custom_utils import decode_predictions, preprocess_input
+                from .custom_utils import preprocess_input
 
                 if (input_type == "file"):
                     try:
@@ -882,7 +886,7 @@ class CustomImagePrediction:
                     prediction = model.predict(x=image_to_predict, steps=1)
 
                 try:
-                    predictiondata = decode_predictions(prediction, top=int(result_count), model_json=self.jsonPath)
+                    predictiondata = self.decode_predictions(prediction, top=int(result_count))
 
                     for result in predictiondata:
                         prediction_results.append(str(result[0]))
@@ -897,7 +901,7 @@ class CustomImagePrediction:
                 model = self.__model_collection[0]
 
                 from imageai.Prediction.InceptionV3.inceptionv3 import InceptionV3
-                from .custom_utils import decode_predictions, preprocess_input
+                from .custom_utils import preprocess_input
 
                 if (input_type == "file"):
                     try:
@@ -938,7 +942,7 @@ class CustomImagePrediction:
 
 
                 try:
-                    predictiondata = decode_predictions(prediction, top=int(result_count), model_json=self.jsonPath)
+                    predictiondata = self.decode_predictions(prediction, top=int(result_count))
 
                     for result in predictiondata:
                         prediction_results.append(str(result[0]))
@@ -950,7 +954,19 @@ class CustomImagePrediction:
 
 
 
+    def decode_predictions(self, preds, top=5):
 
+        results = []
+        for pred in preds:
+            top_indices = pred.argsort()[-top:][::-1]
+            for i in top_indices:
+                each_result = []
+                each_result.append(self.classes[str(i)])
+                each_result.append(pred[i])
+                results.append(each_result)
+
+        return results
+		
     def predictMultipleImages(self, sent_images_array, result_count_per_image=1, input_type="file", thread_safe=False):
         """
                 'predictMultipleImages()' function is used to predict more than one image by receiving the following arguments:
@@ -984,7 +1000,6 @@ class CustomImagePrediction:
                 if (self.__modelType == "squeezenet"):
 
                     from .custom_utils import preprocess_input
-                    from .custom_utils import decode_predictions
                     if (input_type == "file"):
                         try:
                             image_to_predict = image.load_img(image_input, target_size=(
@@ -1025,7 +1040,7 @@ class CustomImagePrediction:
                         prediction = model.predict(x=image_to_predict, steps=1)
 
                     try:
-                        predictiondata = decode_predictions(prediction, top=int(result_count_per_image), model_json=self.jsonPath)
+                        predictiondata = self.decode_predictions(prediction, top=int(result_count_per_image))
 
                         for result in predictiondata:
                             prediction_results.append(str(result[0]))
@@ -1043,7 +1058,6 @@ class CustomImagePrediction:
                     model = self.__model_collection[0]
 
                     from .custom_utils import preprocess_input
-                    from .custom_utils import decode_predictions
                     if (input_type == "file"):
                         try:
                             image_to_predict = image.load_img(image_input, target_size=(
@@ -1083,7 +1097,7 @@ class CustomImagePrediction:
 
                     try:
 
-                        predictiondata = decode_predictions(prediction, top=int(result_count_per_image), model_json=self.jsonPath)
+                        predictiondata = self.decode_predictions(prediction, top=int(result_count_per_image))
 
                         for result in predictiondata:
                             prediction_results.append(str(result[0]))
@@ -1104,7 +1118,6 @@ class CustomImagePrediction:
                     model = self.__model_collection[0]
 
                     from .custom_utils import preprocess_input
-                    from .custom_utils import decode_predictions
                     from ..DenseNet.densenet import DenseNetImageNet121
                     if (input_type == "file"):
                         try:
@@ -1144,7 +1157,7 @@ class CustomImagePrediction:
                         prediction = model.predict(x=image_to_predict, steps=1)
 
                     try:
-                        predictiondata = decode_predictions(prediction, top=int(result_count_per_image), model_json=self.jsonPath)
+                        predictiondata = self.decode_predictions(prediction, top=int(result_count_per_image))
 
                         for result in predictiondata:
                             prediction_results.append(str(result[0]))
@@ -1163,7 +1176,7 @@ class CustomImagePrediction:
                     model = self.__model_collection[0]
 
                     from imageai.Prediction.InceptionV3.inceptionv3 import InceptionV3
-                    from .custom_utils import decode_predictions, preprocess_input
+                    from .custom_utils import preprocess_input
 
                     if (input_type == "file"):
                         try:
@@ -1203,7 +1216,7 @@ class CustomImagePrediction:
                         prediction = model.predict(x=image_to_predict, steps=1)
 
                     try:
-                        predictiondata = decode_predictions(prediction, top=int(result_count_per_image), model_json=self.jsonPath)
+                        predictiondata = self.decode_predictions(prediction, top=int(result_count_per_image))
 
                         for result in predictiondata:
                             prediction_results.append(str(result[0]))
